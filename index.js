@@ -1,11 +1,3 @@
-/**
- * Created with IntelliJ IDEA.
- * User: kevenking
- * Date: 13-12-24
- * Time: 上午11:11
- * To change this template use File | Settings | File Templates.
- */
-
 var tiebaSpider = require('./tiebaspider');
 
 var startNum = 5500;
