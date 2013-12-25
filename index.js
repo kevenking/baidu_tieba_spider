@@ -1,7 +1,7 @@
 var tiebaSpider = require('./tiebaspider');
 
-var startNum = 5500;
-var topicNum = 6500;
+var startNum = 6500;
+var topicNum = 10000;
 //var topicNum = 475899;
 
 for (var i = startNum; i < topicNum; i += 50) {
