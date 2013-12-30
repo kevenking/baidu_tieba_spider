@@ -3,8 +3,11 @@ var nodegrass = require('nodegrass');
 var url = require('url');
 var cheerio = require('cheerio');
 var fs = require('fs');
+var mkdirp = require('mkdirp');
 
 var picDir = '/Users/kevenking/Pictures/baidu_tieba/';
+var folderPath = '';
+var picNum = 0;
 
 function spider(targetUrl){
     var d = require('domain').create();
@@ -17,11 +20,8 @@ function spider(targetUrl){
 //    return;
         var requestOptions = url.parse(targetUrl);
         var kw = encodeURI(requestOptions.query.split('&')[0].split('=')[1]);
-//    console.log(kw);
-//    process.exit();
-        var pn = requestOptions.query.split('&')[2].split('=')[1];
 
-        nodegrass.get(targetUrl,function(data,status,headers){
+        nodegrass.get(targetUrl,function(data,status){
             if(status != 200){
                 console.log('Failed to get content of page : ' + targetUrl);
                 return;
@@ -66,7 +66,7 @@ function processDetailPage(tids,kw){
 function getPhotoPage(photoUrl){
     console.log("enter getPhotoPage...");
     var regex = /\r\n\t\t\t\'title\' : \'(.*?)\',/;
-    nodegrass.get(photoUrl,function(data,status,headers){
+    nodegrass.get(photoUrl,function(data,status){
 //            process.exit();
         if(status != 200){
             console.log('Failed to get contents of page : ' + photoUrl);
@@ -102,9 +102,14 @@ function processGuidePage(guideUrl) {
 
         for(var item in json.data.pic_list){
             var imgUrl = json.data.pic_list[item].img.original.waterurl;
-//            console.log(imgUrl);
 
-            getImg(imgUrl);
+            folderPath = picDir+parseInt(picNum/200);
+            console.log('picNum：'+picNum);
+//            console.log(imgUrl);
+//            console.log(folderPath);
+
+            getImg(imgUrl,folderPath);
+            picNum++;
         }
     },'gbk').on('error',function(e){
             console.log('error:' + e.message);
@@ -113,12 +118,17 @@ function processGuidePage(guideUrl) {
         });
 }
 
-function getImg(imgUrl){
-    console.log("enter getImg...");
+function getImg(imgUrl,folderPath){
+//    console.log("enter getImg...");
     var requestOptions = url.parse(imgUrl);
     var picPathArr = requestOptions.pathname.split('/');
     var picName = picPathArr[picPathArr.length-1];
-    console.log(picName);
+//    console.log(picName);
+//    console.log(folderPath);
+
+    mkdirp(folderPath,function(err){
+        if(err) console.error(err);
+    });
 
     http.get(requestOptions, function(response){
         if(response.statusCode != 200){
@@ -126,7 +136,7 @@ function getImg(imgUrl){
             return;
         }
 
-        response.pipe(fs.createWriteStream(picDir+picName));
+        response.pipe(fs.createWriteStream(folderPath + '/' + picName));
     }).on('error', function(e) {
             console.log("Got error<getting packages>: " + e.message);
         }).on('uncaughtException',function(){
